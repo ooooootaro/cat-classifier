@@ -1,0 +1,11 @@
+{
+    "name": "cat-classifier-backend",
+    "version": "1.0.0",
+    "engines": {
+      "node": "18.x",
+      "python": "3.9"
+    },
+    "scripts": {
+      "start": "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    }
+  }
