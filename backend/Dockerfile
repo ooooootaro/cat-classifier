@@ -2,17 +2,17 @@ FROM python:3.9
 
 WORKDIR /app
 
-# Copy requirements first for better caching
-COPY ./requirements.txt /app/requirements.txt
+# Copy requirements first
+COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the model file
-COPY ./model/yolov11m-cls.pt /app/model/yolov11m-cls.pt
+# Create model directory and copy model
+RUN mkdir -p /app/model
+COPY ../model/yolov11m-cls.pt model/yolov11m-cls.pt
 
-# Copy the application code
-COPY ./app /app/app
+# Copy app code
+COPY app app/
 
-# Set environment variables
 ENV PORT=80
 ENV MODEL_PATH=/app/model/yolov11m-cls.pt
 
