@@ -2,17 +2,18 @@ FROM python:3.9
 
 WORKDIR /app
 
-# Copy requirements first
-COPY requirements.txt requirements.txt
+# Copy requirements first for better caching
+COPY ./requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy model and app code
-COPY model/ model/
-COPY app/ app/
+# Copy the model file
+COPY ./model/yolov11m-cls.pt /app/model/yolov11m-cls.pt
 
-ENV PORT=80
+# Copy the application code
+COPY ./app /app/app
+
+# Copy the model file
 ENV MODEL_PATH=/app/model/yolov11m-cls.pt
 
-EXPOSE 80
-
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
+# Let Railway handle the port
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

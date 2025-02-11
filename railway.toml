@@ -3,10 +3,12 @@ builder = "nixpacks"
 dockerfilePath = "backend/Dockerfile"
 
 [deploy]
-startCommand = "cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+startCommand = "cd backend && uvicorn app.main:app --host 0.0.0.0"
+restartPolicyType = "ON_FAILURE"
 
 [files]
 include = [
     "backend/**/*",
-    "model/**/*"
+    "model/yolov11m-cls.pt",
+    "requirements.txt"
 ]
