@@ -16,7 +16,6 @@ COPY ./app /app/app
 ENV PORT=80
 ENV MODEL_PATH=/app/model/yolov11m-cls.pt
 
-# Expose the port
 EXPOSE 80
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
