@@ -4,15 +4,9 @@ import { Camera, Upload, RefreshCw } from 'lucide-react';
 function App() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [preview, setPreview] = useState(null);
-  const [predictions, setPredictions] = useState([]);
+  const [prediction, setPrediction] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  // Define cat categories
-  const CAT_CATEGORIES = [
-    "白猫", "玳瑁", "黑猫", "虎斑", "橘白",
-    "橘猫", "狸白", "狸花", "奶牛", "三花"
-  ];
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -20,7 +14,7 @@ function App() {
       if (file.type.startsWith('image/')) {
         setSelectedImage(file);
         setPreview(URL.createObjectURL(file));
-        setPredictions([]);
+        setPrediction(null);
         setError(null);
       } else {
         setError('请选择图片文件');
@@ -38,7 +32,6 @@ function App() {
     formData.append('file', selectedImage);
 
     try {
-      // TODO: Replace with actual API endpoint
       const response = await fetch('http://localhost:8000/predict', {
         method: 'POST',
         body: formData
@@ -49,7 +42,16 @@ function App() {
       }
 
       const data = await response.json();
-      setPredictions(data.predictions);
+      
+      // Handle potential error response
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      setPrediction({
+        breed: data.breed,
+        confidence: data.confidence // YOLO model returns confidence as decimal
+      });
     } catch (error) {
       console.error('Error:', error);
       setError('识别过程中出现错误，请重试');
@@ -61,7 +63,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-2xl mx-auto p-6 space-y-6">
-        <h1 className="text-3xl font-bold text-center mb-8">校园猫咪识别</h1>
+        <h1 className="text-3xl font-bold text-center mb-8">猫咪品种识别</h1>
         
         <div className="space-y-4">
           <div className="flex justify-center">
@@ -108,29 +110,22 @@ function App() {
             </button>
           </div>
 
-          {predictions.length > 0 && (
+          {prediction && (
             <div className="bg-white p-6 rounded-lg shadow-lg">
               <h2 className="text-xl font-semibold mb-4">识别结果</h2>
-              <div className="space-y-3">
-                {predictions.map((pred, index) => (
-                  <div
-                    key={index}
-                    className="flex justify-between items-center p-3 bg-gray-50 rounded-lg"
-                  >
-                    <span className="font-medium">{pred.breed}</span>
-                    <div className="flex items-center">
-                      <div className="w-32 h-2 bg-gray-200 rounded-full mr-3">
-                        <div 
-                          className="h-full bg-blue-600 rounded-full"
-                          style={{ width: `${pred.probability * 100}%` }}
-                        />
-                      </div>
-                      <span className="text-gray-600 w-16 text-right">
-                        {(pred.probability * 100).toFixed(1)}%
-                      </span>
-                    </div>
+              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span className="font-medium">{prediction.breed}</span>
+                <div className="flex items-center">
+                  <div className="w-32 h-2 bg-gray-200 rounded-full mr-3">
+                    <div 
+                      className="h-full bg-blue-600 rounded-full"
+                      style={{ width: `${prediction.confidence * 100}%` }}
+                    />
                   </div>
-                ))}
+                  <span className="text-gray-600 w-16 text-right">
+                    {(prediction.confidence * 100).toFixed(1)}%
+                  </span>
+                </div>
               </div>
             </div>
           )}
