@@ -6,12 +6,9 @@ WORKDIR /app
 COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Create model directory and copy model
-RUN mkdir -p /app/model
-COPY ../model/yolov11m-cls.pt model/yolov11m-cls.pt
-
-# Copy app code
-COPY app app/
+# Copy model and app code
+COPY model/ model/
+COPY app/ app/
 
 ENV PORT=80
 ENV MODEL_PATH=/app/model/yolov11m-cls.pt
