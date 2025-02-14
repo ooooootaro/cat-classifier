@@ -24,7 +24,14 @@ except Exception as e:
 # CORS settings
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Add your Vercel URL here for production
+    allow_origins=[
+        "http://localhost:5173",
+        "https://cat-classifier-production.up.railway.app",  # Your Railway backend URL
+        "https://cat-classifier-fawn.vercel.app",  # Primary Vercel URL
+        "https://cat-classifier-a5yoq24ix-wonton-6s-projects.vercel.app"  # Secondary Vercel URL
+        ""
+        ], 
+
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
