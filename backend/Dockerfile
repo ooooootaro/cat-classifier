@@ -1,17 +1,23 @@
-FROM python:3.9
+FROM python:3.9-slim
 
 WORKDIR /app
 
 # Copy requirements first for better caching
-COPY ./requirements.txt /app/requirements.txt
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the entire app directory which now includes the model
-COPY ./app /app/app
+# Create model directory to match MODEL_PATH
+RUN mkdir -p /app/model
 
-# Set environment variables
-ENV MODEL_PATH=/app/app/model/yolov11m-cls.pt
-ENV PORT=8000
+# Copy the app directory
+COPY ./app .
 
-# Use shell form instead of exec form to properly expand environment variables
-CMD uvicorn app.main:app --host=0.0.0.0 --port=$PORT
+# Add debug information
+RUN ls -la /app && ls -la /app/model
+
+# Use environment variables from Railway
+ENV MODEL_PATH=/app/model/yolov11m-cls.pt
+# PORT is already set by Railway
+
+# Use minimal resources
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--limit-concurrency", "1"]
