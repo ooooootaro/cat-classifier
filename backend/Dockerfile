@@ -6,18 +6,20 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Create model directory to match MODEL_PATH
+# Create model directory
 RUN mkdir -p /app/model
 
-# Copy the app directory
-COPY ./app .
+# Copy the entire app directory, including the model
+COPY ./app /app/
 
-# Add debug information
+# Debug information
 RUN ls -la /app && ls -la /app/model
 
 # Use environment variables from Railway
 ENV MODEL_PATH=/app/model/yolov11m-cls.pt
-# PORT is already set by Railway
+
+# Reduce memory usage
+ENV MALLOC_ARENA_MAX=2
 
 # Use minimal resources
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--limit-concurrency", "1"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--workers", "1", "--limit-concurrency", "1"]
