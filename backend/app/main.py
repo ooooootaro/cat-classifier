@@ -11,7 +11,7 @@ app = FastAPI()
 
 # Get the absolute path to the model file
 BASE_DIR = Path(__file__).resolve().parent.parent
-MODEL_PATH = os.path.join(BASE_DIR, "model", "yolov11m-cls.pt")
+MODEL_PATH = os.getenv("MODEL_PATH", "model/yolov11m-cls.pt")
 
 # Load the YOLO model at startup
 try:
