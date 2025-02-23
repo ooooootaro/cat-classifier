@@ -9,20 +9,30 @@ import gc
 
 app = FastAPI()
 
-# Get model path from environment variable
-MODEL_PATH = os.getenv("MODEL_PATH", "/app/model/yolov11m-cls.pt")
-print(f"Using model path: {MODEL_PATH}")
+# Better path handling
+BASE_DIR = Path(__file__).resolve().parent
+MODEL_PATH = os.getenv("MODEL_PATH", str(BASE_DIR / "model" / "yolov11m-cls.pt"))
 
-# Don't load model immediately
+print(f"Current working directory: {os.getcwd()}")
+print(f"Base directory: {BASE_DIR}")
+print(f"Model path: {MODEL_PATH}")
+print(f"Model exists: {os.path.exists(MODEL_PATH)}")
+
+# Load model only when needed
 model = None
 
 def get_model():
     global model
     if model is None:
         try:
-            print(f"Loading model from: {MODEL_PATH}")
-            print(f"Model file exists: {os.path.exists(MODEL_PATH)}")
-            model = YOLO(MODEL_PATH)
+            # Try both paths
+            if os.path.exists(MODEL_PATH):
+                model = YOLO(MODEL_PATH)
+            else:
+                # Try relative path as fallback
+                fallback_path = str(BASE_DIR / "model" / "yolov11m-cls.pt")
+                print(f"Trying fallback path: {fallback_path}")
+                model = YOLO(fallback_path)
             print("Model loaded successfully")
         except Exception as e:
             print(f"Error loading model: {e}")
@@ -50,16 +60,17 @@ def read_root():
         "allowed_origins": ALLOWED_ORIGINS
     }
 
-# Add this new route here
 @app.get("/health")
 async def health_check():
     return {
         "status": "healthy",
-        "environment": {
+        "debug_info": {
+            "cwd": os.getcwd(),
+            "base_dir": str(BASE_DIR),
             "model_path": MODEL_PATH,
             "model_exists": os.path.exists(MODEL_PATH),
-            "cwd": os.getcwd(),
-            "files_in_model_dir": os.listdir(os.path.dirname(MODEL_PATH)) if os.path.exists(os.path.dirname(MODEL_PATH)) else []
+            "directory_contents": os.listdir(str(BASE_DIR)),
+            "model_dir_contents": os.listdir(str(BASE_DIR / "model")) if os.path.exists(str(BASE_DIR / "model")) else []
         }
     }
 
