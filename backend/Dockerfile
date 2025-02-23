@@ -6,14 +6,11 @@ WORKDIR /app
 COPY ./requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the model file
-COPY ./model/yolov11m-cls.pt /app/model/yolov11m-cls.pt
-
-# Copy the application code
+# Copy the entire app directory which now includes the model
 COPY ./app /app/app
 
-# Set environment variables
-ENV MODEL_PATH=/app/model/yolov11m-cls.pt
+# Set environment variables - update path to reflect new structure
+ENV MODEL_PATH=/app/app/model/yolov11m-cls.pt
 
-# Simple command without port handling
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0"]
+# Command with proper module path
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "${PORT}"]
