@@ -66,6 +66,7 @@ async def debug_model_path():
         }
     }
 
+
 @app.get("/")
 def read_root():
     return {

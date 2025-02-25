@@ -18,7 +18,6 @@ RUN ls -la /app/model
 
 # Copy the rest of the app
 COPY ./app /app/
-COPY ./railway.py /app/
 
 # Add debug information
 RUN ls -la /app && ls -la /app/model
@@ -27,5 +26,5 @@ RUN ls -la /app && ls -la /app/model
 ENV MODEL_PATH=/app/model/yolov11m-cls.pt
 ENV MALLOC_ARENA_MAX=2
 
-# Reduce worker count and concurrency for memory constraints
-CMD ["python", "railway.py"]
+# THIS IS THE KEY CHANGE - Direct bash script that handles PORT properly
+CMD bash -c "uvicorn app.main:app --host 0.0.0.0 --port=\$PORT --workers=1"
