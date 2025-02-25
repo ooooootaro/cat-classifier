@@ -2,29 +2,23 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
-# Print working directory for debugging
-RUN pwd && ls -la
-
-# Copy requirements first for better caching
-COPY ./requirements.txt /app/
-RUN pip install --no-cache-dir -r requirements.txt
+# Install dependencies
+RUN pip install --no-cache-dir fastapi uvicorn psutil
 
 # Create model directory
 RUN mkdir -p /app/model
 
-# Copy the model file separately and explicitly 
-COPY ./app/model/yolov11m-cls.pt /app/model/
-RUN ls -la /app/model
+# Copy the minimal app
+COPY ./minimal_app.py /app/
 
-# Copy the rest of the app
-COPY ./app /app/
+# For testing purposes, create a dummy model file
+RUN dd if=/dev/zero of=/app/model/yolov11m-cls.pt bs=1M count=1
 
 # Add debug information
 RUN ls -la /app && ls -la /app/model
 
-# Use environment variables
-ENV MODEL_PATH=/app/model/yolov11m-cls.pt
+# Reduce memory usage
 ENV MALLOC_ARENA_MAX=2
 
-# THIS IS THE KEY CHANGE - Direct bash script that handles PORT properly
-CMD bash -c "uvicorn app.main:app --host 0.0.0.0 --port=\$PORT --workers=1"
+# Start the app
+CMD bash -c "uvicorn minimal_app:app --host 0.0.0.0 --port=\$PORT --workers=1"
