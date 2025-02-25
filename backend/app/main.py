@@ -51,6 +51,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Add this to your main.py file
+
+@app.get("/debug-model-path")
+async def debug_model_path():
+    model_path = os.getenv("MODEL_PATH", "Not set")
+    return {
+        "model_path": model_path,
+        "model_exists": os.path.exists(model_path) if model_path != "Not set" else False,
+        "directory_contents": {
+            "/": os.listdir("/") if os.path.exists("/") else "Not accessible",
+            "/app": os.listdir("/app") if os.path.exists("/app") else "Not accessible",
+            "/app/model": os.listdir("/app/model") if os.path.exists("/app/model") else "Not accessible",
+        }
+    }
+
 @app.get("/")
 def read_root():
     return {

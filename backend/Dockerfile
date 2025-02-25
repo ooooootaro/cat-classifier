@@ -2,24 +2,30 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
+# Print working directory for debugging
+RUN pwd && ls -la
+
 # Copy requirements first for better caching
-COPY requirements.txt .
+COPY ./requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Create model directory
 RUN mkdir -p /app/model
 
-# Copy the entire app directory, including the model
-COPY ./app /app/
+# Copy the model file separately and explicitly 
+COPY ./app/model/yolov11m-cls.pt /app/model/
+RUN ls -la /app/model
 
-# Debug information
+# Copy the rest of the app
+COPY ./app /app/
+COPY ./railway.py /app/
+
+# Add debug information
 RUN ls -la /app && ls -la /app/model
 
-# Use environment variables from Railway
+# Use environment variables
 ENV MODEL_PATH=/app/model/yolov11m-cls.pt
-
-# Reduce memory usage
 ENV MALLOC_ARENA_MAX=2
 
-# Use minimal resources
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--workers", "1", "--limit-concurrency", "1"]
+# Reduce worker count and concurrency for memory constraints
+CMD ["python", "railway.py"]
